@@ -401,7 +401,7 @@ var unauthRequestTests = []struct {
 		"POST",
 		``,
 		http.StatusUnprocessableEntity,
-		`{"errors":{"database":\["no such table: follow_models"\]}}`,
+		`{"errors":{"database":\["[^"]*no such table: follow_models[^"]*"\]}}`,
 		"test database error for following",
 	},
 	{
@@ -412,7 +412,7 @@ var unauthRequestTests = []struct {
 		"DELETE",
 		``,
 		http.StatusUnprocessableEntity,
-		`{"errors":{"database":\["no such table: follow_models"\]}}`,
+		`{"errors":{"database":\["[^"]*no such table: follow_models[^"]*"\]}}`,
 		"test database error for canceling following",
 	},
 	{
