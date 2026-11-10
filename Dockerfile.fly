@@ -1,0 +1,31 @@
+# Fly.io image. fly.toml points [build] dockerfile here; Render and Railway ignore this name.
+# Keep Dockerfile.fly and Dockerfile.vercel identical below this line, so both providers do the same build work.
+FROM golang:1.27.4-bookworm AS build
+WORKDIR /app
+
+# Install and build are separate RUN steps so the ::bench:: markers and BuildKit step times stay separable.
+# Module manifests are copied first so a warm layer cache can skip the install step.
+COPY go.mod go.sum ./
+COPY bench/build.sh bench/build.sh
+RUN sh ./bench/build.sh install
+
+# The image has no .git, so the commit SHA for /version comes from a build arg. Vercel passes
+# VERCEL_GIT_COMMIT_SHA; the harness passes BENCH_COMMIT to Fly.
+ARG BENCH_COMMIT=""
+ARG VERCEL_GIT_COMMIT_SHA=""
+# Copy only the app sources. A local checkout can have a host-built ./app that must not reach the image.
+COPY *.go ./
+COPY articles articles
+COPY common common
+COPY users users
+RUN sh ./bench/build.sh build
+
+# The binary is static (CGO_ENABLED=0), so it needs no libc. distroless/static has /tmp and CA certificates.
+FROM gcr.io/distroless/static-debian12
+ENV GIN_MODE=release \
+    PORT=80
+WORKDIR /app
+COPY --from=build /app/app ./app
+EXPOSE 80
+# Same start command as Render and Railway, so app boot time is comparable.
+CMD ["./app"]
