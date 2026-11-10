@@ -1,6 +1,6 @@
 module github.com/gothinkster/golang-gin-realworld-example-app
 
-go 1.27.4
+go 1.27.3
 
 require (
 	github.com/gin-gonic/gin v1.10.0
