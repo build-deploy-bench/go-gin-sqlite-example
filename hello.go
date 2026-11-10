@@ -12,6 +12,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// commit is the full Git SHA of the build. bench/build.sh sets it with -ldflags "-X main.commit=<sha>".
+var commit = "unknown"
+
 func Migrate(db *gorm.DB) {
 	users.AutoMigrate()
 	db.AutoMigrate(&articles.ArticleModel{})
@@ -50,6 +53,11 @@ func main() {
 	users.ProfileRegister(v1.Group("/profiles"))
 
 	articles.ArticlesRegister(v1.Group("/articles"))
+
+	// The benchmark probe polls this until it returns the SHA of the new deployment.
+	r.GET("/version", func(c *gin.Context) {
+		c.JSON(200, gin.H{"commit": commit})
+	})
 
 	testAuth := r.Group("/api/ping")
 
