@@ -59,7 +59,7 @@ Docker image: build stage `golang:1.27.3-bookworm`, runtime `gcr.io/distroless/s
 - Project `bdb-go-gin-sqlite` `prj_zbY0uRpBCe3Se5YFg1jLFHp7D1jU`, https://bdb-go-gin-sqlite.vercel.app. The project has no Git link, the same as the Node project; deploys upload a clean context directory with `vercel deploy --prod`.
 - Container Runtime (`vercel.json` `framework: container`, `Dockerfile.vercel`). Function region `iad1`. Build machine `basic`, `fixed`. Deployment protection: the default `all_except_custom_domains`.
 - Deploys of `4690fca`: `dpl_Df8gjGCnFFB935QzXDkG67DKxNR6` (first) and `dpl_31Y5wdLk9h9NLHXzPYsS8ptfh87R`. The second one was an accidental repeat. The production alias returns health 200.
-- **`/version` returns `unknown` on Vercel.** `vercel deploy --build-env BENCH_COMMIT=…` does not reach the Dockerfile as a build arg, and a CLI upload has no `VERCEL_GIT_COMMIT_SHA`. Follow-up: deploy from Git (`gitSource`, which sets `VERCEL_GIT_COMMIT_SHA`), or set the project env var `BENCH_COMMIT` before each deploy.
+- **`/version` returns `unknown` on Vercel.** `vercel deploy --build-env BENCH_COMMIT=…` does not reach the Dockerfile as a build arg, and a CLI upload has no `VERCEL_GIT_COMMIT_SHA`. Follow-up: deploy from Git (`gitSource`, which sets `VERCEL_GIT_COMMIT_SHA`), or set the project env var `BENCH_COMMIT` before each deploy. The probe now identifies a deployment by `run` (`BENCH_RUN_ID`, set per deployment with `vercel deploy --env BENCH_RUN_ID=<id>`), so the commit is no longer needed for that.
 - The Buildah store cache is now on by default (builder CLI 65.11.0 logs `Restoring the Buildah store cache`). The first build was cold (`miss (no_compatible_snapshot)`), and its image push took 344 s. The second build hit the cache (545 MiB) and pushed in 0.4 s.
 
 ### Fly.io
@@ -68,3 +68,12 @@ Docker image: build stage `golang:1.27.3-bookworm`, runtime `gcr.io/distroless/s
 - One Machine `8d99e47ae42d98`, `iad`, shared-cpu-1x with 512 MB (the same as the Node app), always on. The health check `/api/tags` passes.
 - Deploy: `flyctl deploy --config fly.toml -a bdb-go-gin-sqlite --remote-only --depot=false --ha=false --yes --build-arg BENCH_COMMIT=<sha>` from a `git archive` of the commit. `/version` returns the right SHA.
 - **Builder difference:** two attempts with the default Depot builder failed before the build started (`connecting to Depot builder: ... authentication handshake failed: EOF`). The smoke deploy used Fly's own remote builder (`--depot=false`, `fly-builder-rosy-headland-8386`). Decide which builder the harness uses and keep it the same for every run.
+
+## Run ID check (2026-11-10)
+
+`d0964a1` deployed with two different `BENCH_RUN_ID` values on each provider. `/version` returned each ID.
+
+- Render: `PUT /v1/services/<id>/env-vars/BENCH_RUN_ID` does not start a deploy. The service uses cache profile `no-cache`, so the ID has no cache effect. Deploy `dep-dbpof5rm8hqs73crh320`. For about 20 s after `live`, the old instance still answered.
+- Railway: `railway variable set BENCH_RUN_ID=<id> --skip-deploys`, then `railway redeploy --commit`. Railpack hashes all variables into its build secrets, so a new ID also reruns the mise Go install (about 3 s). The install and build steps run again on every deploy, also with the same ID. Deploys `bc6855b6-…`, `6582be91-…`, control `24e41071-…`.
+- Vercel: `vercel deploy --prod --env BENCH_RUN_ID=<id>` (runtime env for that deployment only). A new ID kept the build cache and every Buildah layer (`dpl_F5Huph1AK1BPVt7tZqjFLZRgmzoS`).
+- Fly: `flyctl deploy --env BENCH_RUN_ID=<id>`. A new ID kept every BuildKit layer.
