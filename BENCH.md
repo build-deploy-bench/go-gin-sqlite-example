@@ -37,12 +37,11 @@ Docker image: build stage `golang:1.27.3-bookworm`, runtime `gcr.io/distroless/s
 ### Render
 
 - Workspace `tea-dbmbhbg8v5cc73e4m0jg` (workspace plan: Pro).
-- Service `srv-dbpmoh8u01pc73dr4lt0` `bdb-go-gin-sqlite`, https://bdb-go-gin-sqlite.onrender.com
-- Native runtime `go`, region `virginia`. Instance plan `free` and build pipeline `starter`, the same as the Node service. Auto-deploy `no`. Not in a Render project or environment.
+- Service `srv-dbpn9he1egvs738u31fg` `bdb-go-gin-sqlite`, https://bdb-go-gin-sqlite.onrender.com
+- Native runtime `go`, region `virginia`. Instance plan `starter` (paid, always on) and build pipeline `starter`, the same as the Node service. Recreated on 2026-11-10 because the API cannot change a free service to a paid plan; setup deploy `dep-dbpn9hu1egvs738u32cg`. Auto-deploy `no`. Not in a Render project or environment.
 - Build command `./bench/build.sh all` (Render has one build-command field). Start command `./app`. Health check path `/api/tags`.
 - Go: Render's latest stable (1.27.3 on 2026-11-10); see patch 2.
 - Deploys: `dep-dbpmohgu01pc73dr4mkg` (the creation deploy of `50e121b`) failed because `go.mod` asked for 1.27.4. Smoke deploy `dep-dbpmr26tlv9c73dplui0` of `4690fca` is live: health 200, and `/version` returns the right SHA.
-- The free instance plan spins down when idle. The first request after idle includes a cold start.
 
 ### Railway
 
