@@ -74,6 +74,6 @@ Docker image: build stage `golang:1.27.3-bookworm`, runtime `gcr.io/distroless/s
 `d0964a1` deployed with two different `BENCH_RUN_ID` values on each provider. `/version` returned each ID.
 
 - Render: `PUT /v1/services/<id>/env-vars/BENCH_RUN_ID` does not start a deploy. The service uses cache profile `no-cache`, so the ID has no cache effect. Deploy `dep-dbpof5rm8hqs73crh320`. For about 20 s after `live`, the old instance still answered.
-- Railway: `railway variable set BENCH_RUN_ID=<id> --skip-deploys`, then `railway redeploy --commit`. Railpack hashes all variables into its build secrets, so a new ID also reruns the mise Go install (about 3 s). The install and build steps run again on every deploy, also with the same ID. Deploys `bc6855b6-…`, `6582be91-…`, control `24e41071-…`.
+- Railway: `railway variable set BENCH_RUN_ID=<id> --skip-deploys`, then `railway redeploy --commit`. A new ID also reran the mise Go install (about 3 s); the build log has a `[railpack] secrets hash` step, which is the likely cause. The install and build steps run again on every deploy, also with the same ID. Deploys `bc6855b6-…`, `6582be91-…`, control `24e41071-…`.
 - Vercel: `vercel deploy --prod --env BENCH_RUN_ID=<id>` (runtime env for that deployment only). A new ID kept the build cache and every Buildah layer (`dpl_F5Huph1AK1BPVt7tZqjFLZRgmzoS`).
 - Fly: `flyctl deploy --env BENCH_RUN_ID=<id>`. A new ID kept every BuildKit layer.
