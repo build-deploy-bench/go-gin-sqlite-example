@@ -57,7 +57,7 @@ fi
 tar xzf "$SPECS_TARBALL" -C "$SPECS_DIR" --strip-components=3 "realworld-$SPECS_REF/specs/api"
 
 # Clean up database
-rm -f ./data/gorm.db
+rm -f "${DB_PATH:-/tmp/gorm.db}"
 
 echo "Building application..."
 go build -o ./tmp/app hello.go

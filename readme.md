@@ -90,7 +90,7 @@ Available environment variables:
 ```bash
 PORT=8080                     # Server port (default: 8080)
 GIN_MODE=debug               # Gin mode: debug or release
-DB_PATH=./data/gorm.db       # SQLite database path (default: ./data/gorm.db)
+DB_PATH=/tmp/gorm.db         # SQLite database path (default: /tmp/gorm.db)
 TEST_DB_PATH=./data/test.db  # Optional: SQLite database path used for tests
 ```
 
