@@ -60,8 +60,14 @@ func main() {
 	if runID == "" {
 		runID = "unknown"
 	}
+	// Railway gets no BENCH_RUN_ID: a changed variable invalidates part of its build cache. Its own deployment
+	// ID identifies the deployment instead.
+	deployment := os.Getenv("RAILWAY_DEPLOYMENT_ID")
+	if deployment == "" {
+		deployment = "unknown"
+	}
 	r.GET("/version", func(c *gin.Context) {
-		c.JSON(200, gin.H{"commit": commit, "run": runID})
+		c.JSON(200, gin.H{"commit": commit, "run": runID, "deployment": deployment})
 	})
 
 	testAuth := r.Group("/api/ping")
