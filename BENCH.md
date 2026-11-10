@@ -11,7 +11,7 @@
 1. `gorm.io/driver/sqlite` (cgo) replaced with `github.com/glebarez/sqlite` v1.11.0 (pure Go, same GORM API). One test regex was loosened because the new driver words a SQLite error differently.
 2. Go pinned to 1.27.3 in `go.mod` and in the Docker `golang:1.27.3-bookworm` tag. Render's native Go runtime cannot be pinned: it uses its latest stable release with `GOTOOLCHAIN=local`. A `go.mod` version newer than Render's fails the build, so the pin follows Render. When Render moves to a newer patch, Render builds with it and the other providers stay on 1.27.3. Check `go version` in the install step output.
 3. Default `DB_PATH` is `/tmp/gorm.db`. The database is created and migrated at startup on every provider; there is no external database. Data is lost on restart.
-4. `GET /version` returns `{"commit":"<sha>"}`. `bench/build.sh` embeds the SHA with `-ldflags -X main.commit=`. It uses the first value it finds in `BENCH_COMMIT`, `RENDER_GIT_COMMIT`, `RAILWAY_GIT_COMMIT_SHA` or `VERCEL_GIT_COMMIT_SHA`, then `git rev-parse HEAD`, and then `unknown`.
+4. `GET /version` returns `{"commit":"<sha>","run":"<id>"}`. `run` is the runtime env var `BENCH_RUN_ID` (else `unknown`). The harness sets it before each deploy, so it identifies the deployment even when the commit is the same. `bench/build.sh` embeds the SHA with `-ldflags -X main.commit=`. It uses the first value it finds in `BENCH_COMMIT`, `RENDER_GIT_COMMIT`, `RAILWAY_GIT_COMMIT_SHA` or `VERCEL_GIT_COMMIT_SHA`, then `git rev-parse HEAD`, and then `unknown`.
 5. Upstream GitHub Actions workflows removed (a scheduled job ran every 6 hours).
 6. Added `bench/build.sh`, `Dockerfile.fly`, `Dockerfile.vercel` (identical below the header comment), `fly.toml` and `vercel.json`. There is no root `Dockerfile`.
 

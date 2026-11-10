@@ -54,9 +54,14 @@ func main() {
 
 	articles.ArticlesRegister(v1.Group("/articles"))
 
-	// The benchmark probe polls this until it returns the SHA of the new deployment.
+	// The benchmark probe polls this until it returns the run ID of the new deployment. The harness sets
+	// BENCH_RUN_ID before each deploy, and each deployment keeps the env it started with.
+	runID := os.Getenv("BENCH_RUN_ID")
+	if runID == "" {
+		runID = "unknown"
+	}
 	r.GET("/version", func(c *gin.Context) {
-		c.JSON(200, gin.H{"commit": commit})
+		c.JSON(200, gin.H{"commit": commit, "run": runID})
 	})
 
 	testAuth := r.Group("/api/ping")
