@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,6 +28,8 @@ func Migrate(db *gorm.DB) {
 }
 
 func main() {
+	// The benchmark parsers read this marker as the start of app boot. The binary is the whole start command.
+	fmt.Printf("::bench::start %d\n", time.Now().UnixMilli())
 
 	db := common.Init()
 	Migrate(db)
@@ -83,7 +88,13 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := r.Run(":" + port); err != nil {
+	// Listen before serving, so the marker is printed only when the port accepts connections.
+	listener, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		log.Fatal("failed to start server:", err)
+	}
+	fmt.Printf("::bench::listening %d\n", time.Now().UnixMilli())
+	if err := r.RunListener(listener); err != nil {
 		log.Fatal("failed to start server:", err)
 	}
 }

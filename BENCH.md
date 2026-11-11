@@ -23,8 +23,10 @@ The app already binds all interfaces (`r.Run(":" + port)`) and reads `PORT`. The
 |---|---|---|
 | Install | `./bench/build.sh install` = `go version && go mod download` | `::bench::install_start` / `::bench::install_done` |
 | Build | `./bench/build.sh build` = `CGO_ENABLED=0 go build -ldflags "-X main.commit=<sha>" -o app .` | `::bench::build_start` / `::bench::build_done` |
-| Start | `./app` | |
+| Start | `./app` | `::bench::start` (first line of `main`) / `::bench::listening` |
 | Health | `GET /api/tags` returns 200 `{"tags":[]}` | |
+
+Every `::bench::` marker ends with the wall-clock time in epoch milliseconds. At runtime, `::bench::start` marks the start of the start command and `::bench::listening` marks the bound listen socket.
 
 Go has no separate install step. `go mod download` is the install, and compile plus link is the build. `go mod download` downloads all modules in `go.sum`, test-only ones too.
 
