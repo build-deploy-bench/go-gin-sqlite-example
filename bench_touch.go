@@ -1,5 +1,3 @@
 package main
 
-// The benchmark harness writes a new value into this file in a commit of its own before each warm run, so the
-// build step gets new input and no provider can skip it. Do not edit it by hand.
-const benchTouch = "initial"
+const benchTouch = "2026-11-11-samples-v2-railway-go-r1-213051"
