@@ -1,3 +1,3 @@
 package main
 
-const benchTouch = "2026-11-12-full-vercel-go-r2-235214"
+const benchTouch = "2026-11-12-full-render-go-r1-235230"
