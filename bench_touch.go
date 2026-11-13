@@ -1,3 +1,3 @@
 package main
 
-const benchTouch = "2026-11-12-full-render-go-r3-235458"
+const benchTouch = "2026-11-13-gh4-railway-go-r1-212227"
