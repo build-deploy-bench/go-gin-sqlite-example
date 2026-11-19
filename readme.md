@@ -1,3 +1,6 @@
+> [!WARNING]
+> **Benchmark fixture: do not use.** This repository is a copy of [realworld-apps/golang-gin-realworld-example-app](https://github.com/realworld-apps/golang-gin-realworld-example-app). We use it only as a test workload to measure build and deploy times on hosting platforms. It has benchmark patches (see [`BENCH.md`](BENCH.md)), gets no upstream fixes, and is not maintained. To use or contribute to the project, go to [realworld-apps/golang-gin-realworld-example-app](https://github.com/realworld-apps/golang-gin-realworld-example-app).
+
 # ![RealWorld Example App](logo.png)
 
 
@@ -51,7 +54,7 @@ go tool cover -func=coverage.out
 | [golang-jwt/jwt/v5](https://github.com/golang-jwt/jwt) | v5.2.1 | 2024-06 | None; v5.3 only bumps Go version requirement |
 | [go-playground/validator/v10](https://github.com/go-playground/validator) | v10.24.0 | 2024-12 | None; v10.30+ requires Go 1.24 |
 | [golang.org/x/crypto](https://pkg.go.dev/golang.org/x/crypto) | v0.32.0 | 2025-01 | None; keep updated for security fixes |
-| [gorm.io/driver/sqlite](https://github.com/go-gorm/sqlite) | v1.5.7 | 2024-09 | None; requires cgo; use glebarez/sqlite for pure Go |
+| [github.com/glebarez/sqlite](https://github.com/glebarez/sqlite) | v1.11.0 | 2024-02 | None; pure Go (replaces gorm.io/driver/sqlite) |
 | [gosimple/slug](https://github.com/gosimple/slug) | v1.15.0 | 2024-12 | None |
 | [stretchr/testify](https://github.com/stretchr/testify) | v1.10.0 | 2024-10 | None; v2 still in development |
 
@@ -90,7 +93,7 @@ Available environment variables:
 ```bash
 PORT=8080                     # Server port (default: 8080)
 GIN_MODE=debug               # Gin mode: debug or release
-DB_PATH=./data/gorm.db       # SQLite database path (default: ./data/gorm.db)
+DB_PATH=/tmp/gorm.db         # SQLite database path (default: /tmp/gorm.db)
 TEST_DB_PATH=./data/test.db  # Optional: SQLite database path used for tests
 ```
 

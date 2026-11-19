@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -21,7 +21,9 @@ var DB *gorm.DB
 func GetDBPath() string {
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
-		dbPath = "./data/gorm.db"
+		// /tmp is writable on every benchmark provider (Vercel allows writes only there),
+		// so the app needs no per-provider DB_PATH setting.
+		dbPath = "/tmp/gorm.db"
 	}
 	return dbPath
 }

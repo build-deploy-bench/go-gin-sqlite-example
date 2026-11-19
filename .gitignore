@@ -39,3 +39,7 @@ results.sarif
 
 bak.*
 tmp/
+
+# Benchmark build output and provider link state
+/app
+.vercel

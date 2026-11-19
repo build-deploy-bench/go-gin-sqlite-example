@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -11,6 +14,9 @@ import (
 	"github.com/gothinkster/golang-gin-realworld-example-app/users"
 	"gorm.io/gorm"
 )
+
+// commit is the full Git SHA of the build. bench/build.sh sets it with -ldflags "-X main.commit=<sha>".
+var commit = "unknown"
 
 func Migrate(db *gorm.DB) {
 	users.AutoMigrate()
@@ -22,6 +28,8 @@ func Migrate(db *gorm.DB) {
 }
 
 func main() {
+	// The benchmark parsers read this marker as the start of app boot. The binary is the whole start command.
+	fmt.Printf("::bench::start %d\n", time.Now().UnixMilli())
 
 	db := common.Init()
 	Migrate(db)
@@ -51,6 +59,22 @@ func main() {
 
 	articles.ArticlesRegister(v1.Group("/articles"))
 
+	// The benchmark probe polls this until it returns the run ID of the new deployment. The harness sets
+	// BENCH_RUN_ID before each deploy, and each deployment keeps the env it started with.
+	runID := os.Getenv("BENCH_RUN_ID")
+	if runID == "" {
+		runID = "unknown"
+	}
+	// Railway gets no BENCH_RUN_ID: a changed variable invalidates part of its build cache. Its own deployment
+	// ID identifies the deployment instead.
+	deployment := os.Getenv("RAILWAY_DEPLOYMENT_ID")
+	if deployment == "" {
+		deployment = "unknown"
+	}
+	r.GET("/version", func(c *gin.Context) {
+		c.JSON(200, gin.H{"commit": commit, "run": runID, "deployment": deployment})
+	})
+
 	testAuth := r.Group("/api/ping")
 
 	testAuth.GET("/", func(c *gin.Context) {
@@ -64,7 +88,13 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := r.Run(":" + port); err != nil {
+	// Listen before serving, so the marker is printed only when the port accepts connections.
+	listener, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		log.Fatal("failed to start server:", err)
+	}
+	fmt.Printf("::bench::listening %d\n", time.Now().UnixMilli())
+	if err := r.RunListener(listener); err != nil {
 		log.Fatal("failed to start server:", err)
 	}
 }
